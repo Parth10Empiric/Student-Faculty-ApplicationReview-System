@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Faculty Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous" />
+  </head>
+  <body>
+    <input type="hidden" id="csrf-token" value="{{ csrf_token }}" />
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1100">
+      {% if messages %}
+        {% for message in messages %}
+          <div class="toast align-items-center text-white bg-{{ message.tags|default:'primary' }} border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
+            <div class="d-flex">
+              <div class="toast-body">
+                <b>{{ message }}</b>
+              </div>
+              <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+          </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+    <section style="background-color: #eee;">
+      <div class="container py-5">
+        <div class="row">
+          <div class="col">
+            <nav class="bg-body-tertiary rounded-3 p-3 mb-4 d-flex justify-content-between align-items-center">
+              <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item">
+                  <a href="{% url 'home' %}">Home</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">Faculty Dashboard</li>
+              </ol>
+              <div class="d-flex gap-2">
+                <a href="{% url 'profile' %}" class="btn btn-outline-primary btn-sm">Edit Profile</a>
+                <form method="post" action="{% url 'logout' %}" class="mb-0">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-danger btn-sm">Logout</button>
+                </form>
+              </div>
+            </nav>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-lg-4">
+            <div class="card mb-4">
+              <div class="card-body text-center">
+                <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3.webp" alt="avatar" class="rounded-circle img-fluid" style="width: 150px;" />
+                <h5 class="my-3">{{ request.user.first_name }} {{ request.user.last_name }}</h5>
+                <p class="text-muted mb-1">{{ request.user.email }}</p>
+              </div>
+            </div>
+            <div class="card mb-4 mb-lg-0">
+              <div class="card-body p-3">
+                <h5 class="mb-3">Application Summary</h5>
+
+                <ul class="list-group list-group-flush rounded-3">
+                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>
+                      <i class="bi bi-person-circle text-primary me-2"></i>
+                      Faculty Name
+                    </span>
+                    <span class="fw-semibold">{{ request.user.first_name }} {{ request.user.last_name }}</span>
+                  </li>
+
+                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>
+                      <i class="bi bi-folder text-secondary me-2"></i>
+                      Total Applications
+                    </span>
+                    <span class="badge bg-primary rounded-pill">{{ total_applications }}</span>
+                  </li>
+
+                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>
+                      <i class="bi bi-check-circle text-success me-2"></i>
+                      Accepted
+                    </span>
+                    <span id="accepted-count" class="badge bg-success rounded-pill">{{ accepted_count }}</span>
+                  </li>
+
+                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>
+                      <i class="bi bi-x-circle text-danger me-2"></i>
+                      Rejected
+                    </span>
+                    <span id="rejected-count" class="badge bg-danger rounded-pill">{{ rejected_count }}</span>
+                  </li>
+
+                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>
+                      <i class="bi bi-hourglass-split text-warning me-2"></i>
+                      Pending
+                    </span>
+                    <span id="pending-count" class="badge bg-warning text-dark rounded-pill">{{ pending_count }}</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-8">
+            <div class="col-lg-14">
+              <div class="accordion" id="accordionExample">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h5 class="mb-0">Applications to Review</h5>
+                  <!-- Removed Add New Application button as it's not applicable for faculty -->
+                </div>
+                <div class="accordion" id="accordionExample">
+                  {% for app in applications %}
+                    <div class="accordion-item">
+                      <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false" aria-controls="collapse{{ forloop.counter }}">
+                          <div class="w-100 d-flex justify-content-between align-items-center">
+                            <span>Application #{{ app.application_id }}</span>
+
+                            {% if app.status == 'Pending' %}
+                              <span class="badge bg-warning text-dark">Pending</span>
+                            {% elif app.status == 'Accepted' %}
+                              <span class="badge bg-success">Accepted</span>
+                            {% else %}
+                              <span class="badge bg-danger">Rejected</span>
+                            {% endif %}
+                          </div>
+                        </button>
+                      </h2>
+
+                      <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse" aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#accordionExample">
+                        <div class="accordion-body">
+                          <p>
+                            <strong>Student:</strong> {{ app.student.first_name }} {{ app.student.last_name }}
+                          </p>
+                          <p>
+                            <strong>University Name:</strong> {{ app.university_name }}
+                          </p>
+                          <p>
+                            <strong>Program:</strong> {{ app.program_name }}
+                          </p>
+                          <p>
+                            <strong>Study Mode:</strong> {{ app.study_mode }}
+                          </p>
+                          <p>
+                            <strong>Subject:</strong> {{ app.subject }}
+                          </p>
+                          <p>
+                            <strong>Content:</strong> {{ app.content }}
+                          </p>
+
+                          {% if app.status == 'Pending' %}
+                            <div class="d-flex gap-2 mt-3">
+                              <button class="btn btn-success btn-sm action-btn" data-id="{{ app.application_id }}" data-action="accept">Accept</button>
+
+                              <button class="btn btn-danger btn-sm action-btn" data-id="{{ app.application_id }}" data-action="reject">Reject</button>
+                            </div>
+                          {% endif %}
+                        </div>
+                      </div>
+                    </div>
+                  {% empty %}
+                    <p class="text-muted text-center">No applications to review.</p>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        // Find all elements with the class 'toast'
+        var toastElList = [].slice.call(document.querySelectorAll('.toast'))
+        // Initialize and Show each toast
+        var toastList = toastElList.map(function (toastEl) {
+          var toast = new bootstrap.Toast(toastEl)
+          toast.show()
+          return toast
+        })
+      })
+    </script>
+
+    <script>
+      const csrfToken = document.getElementById('csrf-token').value
+      
+      document.querySelectorAll('.action-btn').forEach((button) => {
+        button.addEventListener('click', function () {
+          const applicationId = this.dataset.id
+          const action = this.dataset.action
+      
+          let url = ''
+          if (action === 'accept') {
+            url = "{% url 'accept_application' %}"
+          } else {
+            url = "{% url 'reject_application' %}"
+          }
+      
+          fetch(url, {
+            method: 'POST',
+            headers: {
+              'X-CSRFToken': csrfToken,
+              'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: new URLSearchParams({
+              application_id: applicationId
+            })
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              const badge = this.closest('.accordion-item').querySelector('.badge')
+      
+              badge.className = 'badge ' + (data.status === 'Accepted' ? 'bg-success' : 'bg-danger')
+              badge.innerText = data.status
+      
+              this.parentElement.remove()
+      
+              document.getElementById('pending-count').innerText = data.pending
+              document.getElementById('accepted-count').innerText = data.accepted
+              document.getElementById('rejected-count').innerText = data.rejected
+            })
+            .catch((error) => console.error(error))
+        })
+      })
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+  </body>
+</html>

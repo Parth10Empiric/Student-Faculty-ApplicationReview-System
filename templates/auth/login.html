@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Login - Student/Faculty Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <style>
+      .divider:after,
+      .divider:before {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: #eee;
+      }
+
+      /* Popup styles */
+      #forgotPopup {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 1050;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      #forgotPopup .popup-content {
+        background: white;
+        padding: 25px 30px;
+        border-radius: 10px;
+        text-align: center;
+        max-width: 350px;
+        width: 90%;
+      }
+
+      #forgotPopup .popup-content button {
+        margin-top: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="vh-100">
+      <div class="container py-5 h-100">
+        <div class="row d-flex align-items-center justify-content-center h-100">
+          <!-- Image side -->
+          <div class="col-md-8 col-lg-7 col-xl-6">
+            <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.svg"
+              class="img-fluid" alt="Phone image">
+          </div>
+
+          <!-- Form side -->
+          <div class="col-md-7 col-lg-5 col-xl-5 offset-xl-1">
+            <form method="post" action="{% url 'login' %}">
+              {% csrf_token %}
+
+              <!-- Display login errors if any -->
+              {% comment %} {% if form.errors %}
+                <div class="alert alert-danger">
+                  <strong>Error:</strong> Invalid email or password. Please try again.
+                </div>
+              {% endif %} {% endcomment %}
+              {% if messages %}
+                {% for message in messages %}
+                  <div class="alert alert-danger">
+                    {{ message }}
+                  </div>
+                {% endfor %}
+              {% endif %}
+
+              <!-- Email input -->
+              <div class="form-outline mb-4">
+                <input type="email" id="form1Example13" class="form-control form-control-lg" name="username" required />
+                <label class="form-label" for="form1Example13">Email address</label>
+              </div>
+
+              <!-- Password input -->
+              <div class="form-outline mb-4">
+                <input type="password" id="form1Example23" class="form-control form-control-lg" name="password" required />
+                <label class="form-label" for="form1Example23">Password</label>
+              </div>
+
+              <!-- Checkbox & Forgot password -->
+              <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" value="" id="form1Example3" checked />
+                  <label class="form-check-label" for="form1Example3"> Remember me </label>
+                </div>
+                <a href="#!" id="forgotPasswordLink">Forgot password?</a>
+              </div>
+
+              <!-- Submit button -->
+              <button type="submit" class="btn btn-primary btn-lg btn-block w-100">Sign in</button>
+
+              <!-- Registration link -->
+              <p class="text-center mt-3">Don't have an account? <a href="{% url 'register' %}">Register here</a></p>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Forgot password popup -->
+    <div id="forgotPopup">
+      <div class="popup-content">
+        <p>Feature available soon!</p>
+        <button class="btn btn-primary" id="closeForgotPopup">OK</button>
+      </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+
+    <!-- Popup JS -->
+    <script>
+  const forgotLink = document.getElementById('forgotPasswordLink');
+  const forgotPopup = document.getElementById('forgotPopup');
+  const closePopupBtn = document.getElementById('closeForgotPopup');
+
+  // Make sure popup is hidden initially
+  forgotPopup.style.display = 'none';
+
+  // Show popup ONLY when user clicks "Forgot password?"
+  forgotLink.addEventListener('click', function(e){
+    e.preventDefault(); // prevent default link behavior
+    forgotPopup.style.display = 'flex';
+  });
+
+  // Close popup on OK button click
+  closePopupBtn.addEventListener('click', function(){
+    forgotPopup.style.display = 'none';
+  });
+
+  // Close popup if user clicks outside popup content
+  forgotPopup.addEventListener('click', function(e){
+    if(e.target === forgotPopup){
+      forgotPopup.style.display = 'none';
+    }
+  });
+</script>
+
+  </body>
+</html>
