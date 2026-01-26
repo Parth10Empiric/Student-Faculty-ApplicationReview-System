@@ -11,6 +11,8 @@ class CustomUserAdmin(admin.ModelAdmin):
     ordering = ('email',)
 
 # Register your models
+
+
+
 admin.site.register(User, CustomUserAdmin)
 admin.site.register(UserRole)
-# admin.site.register(Application)

@@ -8,7 +8,7 @@ class Application(models.Model):
     university_name = models.CharField(max_length=100)
     program_name = models.CharField(max_length=50) 
     study_mode = models.CharField(max_length=20, choices=[('Online','Online'),('On-Campus','On-Campus')]) 
-    student = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'role':'Student'})
+    student = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'role':'Student'}, related_name='applications_student')
     status = models.CharField(max_length=10, choices=[('Pending','Pending'),('Accepted','Accepted'),('Rejected','Rejected')], default='Pending')
     subject = models.CharField(max_length=100, blank=False)
     content = models.TextField(blank=False)

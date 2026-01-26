@@ -31,7 +31,9 @@ urlpatterns = [
     path('profile/', views.profile_view, name='profile'),
     path('logout/', views.logout_view, name='logout'),
 
-    path('application/', include('applications.urls'))
+    path('application/', include('applications.urls')),
+
+    path('api/', include('api.urls')),
 ]
 
 handler403 = 'authentication.views.custom_403_handler'

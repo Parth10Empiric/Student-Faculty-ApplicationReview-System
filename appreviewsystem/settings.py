@@ -42,6 +42,10 @@ INSTALLED_APPS = [
 
     'authentication',
     'applications',
+    'api',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'django_filters',    
 ]
 
 MIDDLEWARE = [
@@ -52,7 +56,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'authentication.middleware.HandleCsrfFailureMiddleware',
+    # 'authentication.middleware.HandleCsrfFailureMiddleware',
 ]
 
 ROOT_URLCONF = 'appreviewsystem.urls'
@@ -142,3 +146,18 @@ MESSAGE_TAGS = {
     messages.ERROR: 'danger', 
 }
 
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 10,
+}
