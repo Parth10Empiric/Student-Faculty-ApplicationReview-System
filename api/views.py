@@ -140,7 +140,7 @@ class FacultyApplicationViewSet(ModelViewSet):
     http_method_names = ['get', 'patch', 'delete', 'head', 'options']
     
     def create(self, request, *args, **kwargs):
-        raise MethodNotAllowed("PATCH", detail="Faculty cannot patch applications")
+        raise MethodNotAllowed("PATCH", detail="Faculty cannot atch applications")
 
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = {'status': ['exact']}
