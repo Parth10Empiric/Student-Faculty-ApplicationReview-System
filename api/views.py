@@ -19,6 +19,8 @@ from authentication.models import UserRole
 
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 
 class RegisterAPI(APIView):
@@ -37,22 +39,6 @@ class RegisterAPI(APIView):
                 "created": token.created
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=400)
-    
-# class LoginAPI(APIView):
-#     permission_classes = [permissions.AllowAny]
-
-#     def post(self, request):
-#         email = request.data.get('email')
-#         password = request.data.get('password')
-
-#         user = authenticate(email=email, password=password)
-#         if user:
-#             token, _ = Token.objects.get_or_create(user=user)
-#             return Response({
-#                 "token": token.key,
-#                 "role": user.role.title
-#             })
-#         return Response({"error": "Invalid credentials"}, status=401)
 
 class LoginAPI(APIView):
     permission_classes = [permissions.AllowAny]
@@ -60,20 +46,15 @@ class LoginAPI(APIView):
     def post(self, request):
         email = request.data.get('email')
         password = request.data.get('password')
-        
+
         user = authenticate(email=email, password=password)
-        
         if user:
-            Token.objects.filter(user=user).delete()
-            token = Token.objects.create(user=user)
-            
+            token, _ = Token.objects.get_or_create(user=user)
             return Response({
-                "message": "Login successful",
                 "token": token.key,
                 "role": user.role.title
-            }, status=status.HTTP_200_OK)
-            
-        return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+            })
+        return Response({"error": "Invalid credentials"}, status=401)
 
 # class StudentDashboardAPI(APIView):
 #     permission_classes = [IsStudent]
