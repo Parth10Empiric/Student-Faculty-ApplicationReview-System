@@ -1,24 +1,24 @@
+from django.contrib.auth import authenticate
+from django_filters.rest_framework import DjangoFilterBackend
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
-from django.contrib.auth import authenticate
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.permissions import IsAdminUser
 from rest_framework.decorators import action
-from rest_framework.generics import GenericAPIView
 from rest_framework.mixins import ListModelMixin, CreateModelMixin
-from django.contrib.auth import login
 from rest_framework.authtoken.models import Token
 from rest_framework.serializers import Serializer, ChoiceField
 from rest_framework.exceptions import MethodNotAllowed
-from rest_framework.authentication import TokenAuthentication
+from rest_framework.filters import SearchFilter
+
 from .serializer import UserRegisterSerializer, ApplicationSerializer, UserRoleSerializer
 from applications.models import Application
 from .permission import IsFaculty, IsStudent
 from authentication.models import UserRole
 
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.filters import SearchFilter
+
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
@@ -56,29 +56,6 @@ class LoginAPI(APIView):
             })
         return Response({"error": "Invalid credentials"}, status=401)
 
-# class StudentDashboardAPI(APIView):
-#     permission_classes = [IsStudent]
-
-#     def get(self, request):
-#         applications = Application.objects.filter(student=request.user)
-#         serializer = ApplicationSerializer(applications, many=True)
-#         return Response(serializer.data)
-
-# --------------
-# class StudentApplicationViewSet(ModelViewSet):
-#     serializer_class = ApplicationSerializer
-#     permission_classes = [IsStudent]
-
-#     filter_backends = [DjangoFilterBackend, SearchFilter]
-#     filterset_fields = ['status']
-#     search_fields = ['application_id']
-    
-#     def get_queryset(self):
-#         return Application.objects.filter(student=self.request.user)
-
-#     def perform_create(self, serializer):
-#         serializer.save(student=self.request.user)
-# -----------------------
 
 class StudentApplicationViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):
     serializer_class = ApplicationSerializer
@@ -95,20 +72,9 @@ class StudentApplicationViewSet(CreateModelMixin, ListModelMixin, GenericViewSet
         serializer.save(student=self.request.user)
 
 
-
-# class ApplicationCreateAPI(APIView):
-#     permission_classes = [IsStudent]
-
-#     def post(self, request):
-#         serializer = ApplicationSerializer(data=request.data)
-#         if serializer.is_valid():
-#             serializer.save(student=request.user)
-#             return Response({"message": "Application submitted"}, status=201)
-#         return Response(serializer.errors, status=400)
-
 class StatusUpdateSerializer(Serializer):
     status = ChoiceField(
-        choices=['Accepted', 'Rejected'],
+        choices=['Accepted', 'Rejected', 'Pending'],
         required=True
     )
 
@@ -135,7 +101,17 @@ class FacultyApplicationViewSet(ModelViewSet):
                 "application_id": application.application_id,
                 "current_status": application.status
             })
+            
+        if application.status == 'Accepted':
+            return Response({
+                "message": "alredy Accepted you can not change"
+            })
 
+        if application.status == 'Rejected':
+            return Response({
+                "message": "alredy Rejected you can not change"
+            })
+            
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -147,36 +123,6 @@ class FacultyApplicationViewSet(ModelViewSet):
             "new_status": application.status
         })
         
-        
-# class FacultyDashboardAPI(ListModelMixin, GenericAPIView):
-#     permission_classes = [IsFaculty]
-#     queryset = Application.objects.all()
-#     serializer_class = ApplicationSerializer
-
-#     def get(self,request,*args, **kwargs):
-#         return self.list(request, *args, **kwargs)
-
-    # def get(self, request):
-    #     applications = Application.objects.all()
-    #     serializer = ApplicationSerializer(applications, many=True)
-    #     return Response(serializer.data)
-
-# class ApplicationStatusAPI(APIView):
-#     permission_classes = [IsFaculty]
-
-#     def patch(self, request, pk):
-#         try:
-#             application = Application.objects.get(pk=pk)
-#         except Application.DoesNotExist:
-#             return Response({"error": "Application not found"}, status=404)
-
-#         status_value = request.data.get('status')
-#         if status_value not in ['Accepted', 'Rejected']:
-#             return Response({"error": "Invalid status"}, status=400)
-
-#         application.status = status_value
-#         application.save()
-#         return Response({"message": f"Application {status_value}"})
 
 class UserRoleViewset(ModelViewSet):
     queryset = UserRole.objects.all()
